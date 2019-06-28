@@ -12,39 +12,43 @@ class PinEntry extends React.Component
         this.getTa = this.getTa.bind(this);
     }
 
+    // Handle form text updates
     handleChange = event => {
         this.setState({
             [event.target.id]: event.target.value
         });
     }
 
+    // Encrypt user-entered PIN data
     encryptPin()
     {
         var CryptoJS = require("crypto-js");
 
+        // This secret key phrase must match the one on the API server.
+        // Should be replaced with environment variable.
         const keyString = "donteverlookatme";
-        console.log(keyString);
 
+        // Convert the key string to a data array type
         var key = CryptoJS.enc.Utf8.parse(keyString);
         console.log(key);    
 
+        // Encrypt the PIN
         var encryptedPinBytes = CryptoJS.AES.encrypt(this.state.pin, key, {
             mode: CryptoJS.mode.ECB,
             padding: CryptoJS.pad.Pkcs7
         });
 
+        // Convert the encrypted PIN data array to a hex string
         var encryptedPinHexString = encryptedPinBytes.ciphertext.toString();
         console.log(`PIN ${this.state.pin}: ${encryptedPinHexString}`);
 
         return encryptedPinHexString;
     }
 
+    // Send an encrypted PIN to get user data from the API server
     getTa()
     {
         const encryptedPin = encodeURIComponent(this.encryptPin());
-
-        // //DEBUG
-        // this.setState({ taName: encryptedPin })
 
         const options = {
             method: 'GET',
