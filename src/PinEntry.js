@@ -42,7 +42,41 @@ class PinEntry extends React.Component
         var encryptedPinHexString = encryptedPinBytes.ciphertext.toString();
         console.log(`PIN ${this.state.pin}: ${encryptedPinHexString}`);
 
+        this.decryptPin(encryptedPinHexString)
+
         return encryptedPinHexString;
+    }
+
+    decryptPin(encryptedPinString)
+    {
+        var CryptoJS = require("crypto-js");
+
+        // This secret key phrase must match the one on the API server.
+        // Should be replaced with environment variable.
+        const keyString = "donteverlookatme";
+
+        // Convert the key string to a data array type
+        var key = CryptoJS.enc.Utf8.parse(keyString);
+        console.log(key);
+
+        // Convert the plain text hex representation of the PIN to a Base64 string
+        var pinBytes = CryptoJS.enc.Hex.parse(encryptedPinString);
+        var ciphertext = pinBytes.toString(CryptoJS.enc.Base64);
+
+        // Decrypt the PIN
+        var decryptedPinBytes = CryptoJS.AES.decrypt(ciphertext, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7,
+        });
+
+        // Convert the decryption results to a plain text string
+        var decryptedPinPlainText = decryptedPinBytes.toString(CryptoJS.enc.Utf8);
+
+        // // Only include this for debugging
+        // console.log(`Decrypted PIN ${decryptedPinPlainText}`);
+
+
+        return decryptedPinPlainText;
     }
 
     // Send an encrypted PIN to get user data from the API server
